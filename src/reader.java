@@ -3,10 +3,7 @@ import java.awt.event.*;
 import java.io.*;
 import javax.imageio.*;
 import java.awt.image.*;
-//-------Version 1.1----------------
-//remove toolbox exchange to right click menu 
-//-------Version 1.0----------------
-//changelog added
+
 public class reader implements ActionListener
 {
 	//========build UI=========
