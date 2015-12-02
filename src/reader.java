@@ -18,8 +18,6 @@ public class reader implements ActionListener
 	BufferedImage img;
 	Showfr ab;
 	RGBarray array;
-	int[][] codebook=new int[255][4];
-	int[] indexarray;
 	//========cancel button setting=========
 	void cancel()
 	{
