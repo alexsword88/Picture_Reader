@@ -102,7 +102,7 @@ class RGBarray
 							myheight-=(myheight%4);
 						}
 					}
-					//indexarray=new int[(mywidth/4)*(myheight/4)];
+					indexarray=new int[(mywidth/4)*(myheight/4)];
 				case 50:
 					for(int i=0;i<colorarray.length-1;i++)
 					{

@@ -1,1 +1,4 @@
 *.class
+bin/reader.class
+bin/reader$myfilter.class
+bin/reader$closeX.class
