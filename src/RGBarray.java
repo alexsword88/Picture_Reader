@@ -4,9 +4,10 @@ import java.awt.image.BufferedImage;
 
 class RGBarray
 	{
-		int[] colorarray,colorarraybackup;
+		int[] colorarray,colorarraybackup,indexarray;
 		int[] Rarray=new int[256],Garray=new int[256],Barray=new int[256];
 		int mywidth=0,myheight=0,userwidth=0,userheight=0,Rmax=0,Gmax=0,Bmax=0;
+		int[][] codebook=new int[255][4];
 		BufferedImage img;
 		RGBarray(BufferedImage temp)
 		{
