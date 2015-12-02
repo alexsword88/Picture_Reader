@@ -1,20 +1,29 @@
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
 class RGBarray
 	{
-		int[] colorarray,colorarraybackup,indexarray;
+		int[] colorarray,colorarraybackup;
 		int[] Rarray=new int[256],Garray=new int[256],Barray=new int[256];
 		int mywidth=0,myheight=0,userwidth=0,userheight=0,Rmax=0,Gmax=0,Bmax=0;
-		int[][] codebook=new int[255][4];
 		BufferedImage img;
+		Codebook codebook;
+		boolean flag4codebook=false;
 		RGBarray(BufferedImage temp)
 		{
 			img=temp;
 			colorarray=img.getRGB(0,0,img.getWidth(null),img.getHeight(null),null,0,img.getWidth(null));
 			colorarraybackup=img.getRGB(0,0,img.getWidth(null),img.getHeight(null),null,0,img.getWidth(null));
 			analysis();
+		}
+		public void renewwh(int tempwidth,int tempheight)
+		{
+			mywidth=tempwidth;
+			myheight=tempheight;
+			if(!flag4codebook)
+			{
+				codebook=new Codebook(this);
+			}
 		}
 		public void analysis()
 		{
@@ -93,16 +102,7 @@ class RGBarray
 					}
 					break;
 				case 30:
-					Dimension sampledim=new Dimension(4,4);
-					if(mywidth%4!=0)
-					{
-						mywidth-=(mywidth%4);
-						if(myheight%4!=0)
-						{
-							myheight-=(myheight%4);
-						}
-					}
-					indexarray=new int[(mywidth/4)*(myheight/4)];
+					
 				case 50:
 					for(int i=0;i<colorarray.length-1;i++)
 					{

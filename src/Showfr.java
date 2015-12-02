@@ -96,8 +96,7 @@ class Showfr extends Frame implements ActionListener
 		{
 			temp=new BufferedImage(img.getWidth(null),img.getHeight(null),BufferedImage.TYPE_INT_RGB);
 			temp2=new BufferedImage(img.getHeight(null),img.getWidth(null),BufferedImage.TYPE_INT_RGB);
-			rgbarray.mywidth=img.getWidth(null);
-			rgbarray.myheight=img.getHeight(null);
+			rgbarray.renewwh(img.getWidth(null),img.getHeight(null));
 			try
 			{
 				temp.setRGB(0,0,rgbarray.mywidth,rgbarray.myheight,rgbarray.colorarray,0,rgbarray.mywidth);
@@ -125,8 +124,7 @@ class Showfr extends Frame implements ActionListener
 			}
 			repaint();
 			this.setVisible(true);
-			rgbarray.userwidth=img.getWidth();
-			rgbarray.userheight=img.getHeight();
+			rgbarray.renewwh(img.getWidth(null),img.getHeight(null));
 		}
 		void renew()
 		{
