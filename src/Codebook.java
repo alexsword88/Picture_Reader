@@ -63,6 +63,7 @@ public class Codebook
 			diff=Math.abs(total(arrayx,arrayy,0)-total(codebook[0][0],codebook[0][1],codebook[0][2],codebook[0][3],0))
 					+Math.abs(total(arrayx,arrayy,1)-total(codebook[0][0],codebook[0][1],codebook[0][2],codebook[0][3],1))
 					+Math.abs(total(arrayx,arrayy,2)-total(codebook[0][0],codebook[0][1],codebook[0][2],codebook[0][3],2));
+			index=0;
 			for(int i=0;i<256;i++)
 			{
 				int tempdiff=Math.abs(total(arrayx,arrayy,0)-total(codebook[i][0],codebook[i][1],codebook[i][2],codebook[i][3],0))
@@ -96,13 +97,11 @@ public class Codebook
 		int tempindex=0;
 		for(int i:diffarray)
 		{
-			if(i>1000)
+			if(i>150)
 			{
 				flag4changed=true;
 				for(int j:updatereq)
 				{
-					System.out.println(j);
-					System.out.println(indexarray[tempindex]);
 					if(j==indexarray[tempindex])
 					{
 						flag4same=true;
@@ -116,26 +115,29 @@ public class Codebook
 			flag4same=false;
 			tempindex++;
 		}
-		/*int zzz=0;
-		System.out.println("FIRST");
-		for(Color[] i:codebook)
+		int zzz=0;
+		/*System.out.println("FIRST");
+		for(int i:diffarray)
 		{
-			for(Color z:i)
-			{
-			System.out.print(","+z.getRed()+",");
+			System.out.print(","+i+",");
 			if(zzz>10)
 			{
 				System.out.println();
 				zzz=0;
 			}
 			zzz++;
-			}
 		}*/
+		System.out.println(updatereq.size());
+		System.out.print("[");
+		for(int i:updatereq)
+		{
+			System.out.print(diffarray[i]+",");
+		}
+		System.out.print("]");
 		if(!flag4same)
 		{
 			for(int i:updatereq)
 			{
-				System.out.println(i+":updatereq");
 				int arrayx=0,arrayy=0;
 				for(int j=0;j<indexarray.length;j++)
 				{
@@ -209,6 +211,7 @@ public class Codebook
 			temp4depart[index][0]=new Color(i).getRed();
 			temp4depart[index][1]=new Color(i).getGreen();
 			temp4depart[index][2]=new Color(i).getBlue();
+			index++;
 		}
 	}
 	int arrayindex(int x,int y,int width)
@@ -221,12 +224,10 @@ public class Codebook
 		try
 		{
 			temp=temp4depart[arrayindex(x+1,y,rgbarray.mywidth)][color];
-			temp3=temp4depart[arrayindex(x+1,y+1,rgbarray.mywidth)][color];
 		}
 		catch(ArrayIndexOutOfBoundsException e)
 		{
 			temp=0;
-			temp3=0;
 		}
 		try
 		{
@@ -235,6 +236,14 @@ public class Codebook
 		catch(ArrayIndexOutOfBoundsException e)
 		{
 			temp2=0;
+		}
+		try
+		{
+			temp3=temp4depart[arrayindex(x+1,y+1,rgbarray.mywidth)][color];
+		}
+		catch(ArrayIndexOutOfBoundsException e)
+		{
+			temp3=0;
 		}
 		return total(temp4depart[arrayindex(x,y,rgbarray.mywidth)][color],temp,temp2,temp3);
 	}
