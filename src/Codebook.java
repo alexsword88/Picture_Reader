@@ -97,7 +97,7 @@ public class Codebook
 		int tempindex=0;
 		for(int i:diffarray)
 		{
-			if(i>150)
+			if(i>306)
 			{
 				flag4changed=true;
 				for(int j:updatereq)
@@ -127,13 +127,6 @@ public class Codebook
 			}
 			zzz++;
 		}*/
-		System.out.println(updatereq.size());
-		System.out.print("[");
-		for(int i:updatereq)
-		{
-			System.out.print(diffarray[i]+",");
-		}
-		System.out.print("]");
 		if(!flag4same)
 		{
 			for(int i:updatereq)
