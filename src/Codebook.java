@@ -236,7 +236,7 @@ public class Codebook
 		{
 			temp2=0;
 		}
-		return total(picarray[arrayindex(x,y,rgbarray.mywidth)],temp,temp2,temp3);
+		return total(temp4depart[arrayindex(x,y,rgbarray.mywidth)][color],temp,temp2,temp3);
 	}
 	int total(Color a,Color b,Color c,Color d,int color)
 	{
