@@ -117,18 +117,6 @@ public class Codebook
 			flag4same=false;
 			tempindex++;
 		}
-		int zzz=0;
-		/*System.out.println("FIRST");
-		for(int i:diffarray)
-		{
-			System.out.print(","+i+",");
-			if(zzz>10)
-			{
-				System.out.println();
-				zzz=0;
-			}
-			zzz++;
-		}*/
 		if(!flag4same)
 		{
 			for(int i:updatereq)
@@ -235,11 +223,10 @@ public class Codebook
 	}
 	void DCT(double[][] temparray,int x,int y,int color)
 	{
-		double[][] temp88={{103,100,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0}};
+		double[][] temp88=new double[8][8];
 		double temp=0,temp2=0;
 		int xx=0,yy=0,count=0;
-		System.out.print("KK[");
-		/*for(int i=0;i<8;i++)
+		for(int i=0;i<8;i++)
 		{
 			for(int j=0;j<8;j++)
 			{
@@ -250,22 +237,14 @@ public class Codebook
 			y++;
 			x-=8;
 		}
-		
-		System.out.println("]");
-		y-=8;
-		System.out.print("[");*/
 		do
 		{
-			temp=0;
+			temp=1;
 			temp2=0;
-			if(xx!=0)
+			if(xx==0)
 			{
-				temp=1;
-				if(yy!=0)
-				{
-					temp*=1;
-				}
-				else
+				temp=(Math.sqrt(2)/2);
+				if(yy==0)
 				{
 					temp*=(Math.sqrt(2)/2);
 				}
@@ -273,12 +252,7 @@ public class Codebook
 			}
 			else
 			{
-				temp=(Math.sqrt(2)/2);
-				if(yy!=0)
-				{
-					temp*=1;
-				}
-				else
+				if(yy==0)
 				{
 					temp*=(Math.sqrt(2)/2);
 				}
@@ -293,20 +267,17 @@ public class Codebook
 			}
 			temp*=temp2;
 			dctarray[arrayindex(x,y,mywidth)][color]=temp;
-			System.out.print(/*(int)*/(temp)+",");
 			x++;
 			xx++;
 			count++;
 			if(count%8==0)
 			{
-				System.out.println();
 				x-=8;
 				xx-=8;
 				yy++;
 				y++;
 			}
 		}while(count!=64);
-		System.out.println("]");
 	}
 	int arrayindex(int x,int y,int width)
 	{
