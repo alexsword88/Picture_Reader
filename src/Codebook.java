@@ -4,6 +4,7 @@ public class Codebook
 {
 	Color[][] codebook=new Color[256][4];
 	int[][] temp4depart;
+	double[][] YCbCrarray,dctarray;
 	int[] indexarray,diffarray,picarray;
 	boolean flag4changed=false;
 	RGBarray rgbarray;
@@ -13,23 +14,23 @@ public class Codebook
 		rgbarray=temp;
 		mywidth=rgbarray.mywidth;
 		myheight=rgbarray.myheight;
-		if(mywidth%2!=0)
+		if(mywidth%8!=0)
 		{
-			mywidth-=(mywidth%2);
-			if(myheight%2!=0)
+			mywidth-=(mywidth%8);
+			if(myheight%8!=0)
 			{
-				myheight+=(myheight%2);
+				myheight+=(myheight%8);
 			}
 		}
 		else
 		{
-			if(myheight%2!=0)
+			if(myheight%8!=0)
 			{
-				myheight+=(myheight%2);
+				myheight+=(myheight%8);
 			}
 		}
-		indexarray=new int[(mywidth/2)*(myheight/2)];
-		diffarray=new int[(mywidth/2)*(myheight/2)];
+		indexarray=new int[(mywidth/8)*(myheight/8)];
+		diffarray=new int[(mywidth/8)*(myheight/8)];
 		randomcode();
 		compress(rgbarray.colorarray);
 	}
@@ -46,13 +47,14 @@ public class Codebook
 	void compress(int[] picarraytemp)
 	{
 		picarray=picarraytemp;
-		depart(picarray,picarray.length);
-		do
+		rgbtoyuv(picarray,picarray.length);
+		/*do
 		{
 			flag4changed=false;
 			assign();
 			update();
-		}while(flag4changed);
+		}while(flag4changed);*/
+		DCT(YCbCrarray,0,0,0);
 		System.out.println("Fin");
 	}
 	void assign()
@@ -195,9 +197,11 @@ public class Codebook
 		}
 		System.out.println("update part2 ok");
 	}
-	void depart(int[] array,int length)
+	void rgbtoyuv(int[] array,int length)
 	{
 		temp4depart=new int[length][3];
+		YCbCrarray=new double[mywidth*myheight][3];
+		dctarray=new double[mywidth*myheight][3];
 		int index=0;
 		for(int i:array)
 		{
@@ -206,6 +210,103 @@ public class Codebook
 			temp4depart[index][2]=new Color(i).getBlue();
 			index++;
 		}
+		index=0;
+		for(int i=0;i<mywidth*myheight;i++)
+		{
+			if(index<=rgbarray.mywidth&&index<=mywidth)
+			{
+				YCbCrarray[i][0]=0.299*temp4depart[i][0]+0.587*temp4depart[i][1]+0.144*temp4depart[i][2];
+				YCbCrarray[i][1]=0.564*(temp4depart[i][2]-YCbCrarray[i][0]);
+				YCbCrarray[i][2]=0.713*(temp4depart[i][0]-YCbCrarray[i][0]);
+			}
+			else
+			{
+				YCbCrarray[i][0]=0;
+				YCbCrarray[i][1]=0;
+				YCbCrarray[i][2]=0;
+			}
+			if(index==mywidth)
+			{
+				index=0;
+				continue;
+			}
+			index++;
+		}
+	}
+	void DCT(double[][] temparray,int x,int y,int color)
+	{
+		double[][] temp88={{103,100,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0}};
+		double temp=0,temp2=0;
+		int xx=0,yy=0,count=0;
+		System.out.print("KK[");
+		/*for(int i=0;i<8;i++)
+		{
+			for(int j=0;j<8;j++)
+			{
+				temp88[i][j]=temparray[arrayindex(x,y,mywidth)][color];
+				System.out.print(temparray[arrayindex(x,y,mywidth)][color]+",");
+				x++;
+			}
+			y++;
+			x-=8;
+		}
+		
+		System.out.println("]");
+		y-=8;
+		System.out.print("[");*/
+		do
+		{
+			temp=0;
+			temp2=0;
+			if(xx!=0)
+			{
+				temp=1;
+				if(yy!=0)
+				{
+					temp*=1;
+				}
+				else
+				{
+					temp*=(Math.sqrt(2)/2);
+				}
+				temp/=4;
+			}
+			else
+			{
+				temp=(Math.sqrt(2)/2);
+				if(yy!=0)
+				{
+					temp*=1;
+				}
+				else
+				{
+					temp*=(Math.sqrt(2)/2);
+				}
+				temp/=4;
+			}
+			for(int i=0;i<8;i++)
+			{
+				for(int j=0;j<8;j++)
+				{
+					temp2+=Math.cos(((2*i+1)*xx*Math.PI)/16)*Math.cos(((2*j+1)*yy*Math.PI)/16)*temp88[i][j];
+				}
+			}
+			temp*=temp2;
+			dctarray[arrayindex(x,y,mywidth)][color]=temp;
+			System.out.print(/*(int)*/(temp)+",");
+			x++;
+			xx++;
+			count++;
+			if(count%8==0)
+			{
+				System.out.println();
+				x-=8;
+				xx-=8;
+				yy++;
+				y++;
+			}
+		}while(count!=64);
+		System.out.println("]");
 	}
 	int arrayindex(int x,int y,int width)
 	{
