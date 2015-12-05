@@ -2,7 +2,6 @@ import java.awt.Color;
 import java.util.*;
 public class Codebook
 {
-	Color[][] codebook=new Color[256][4];
 	int[][] temp4depart;
 	double[][] YCbCrarray,dctarray;
 	int[] indexarray,diffarray,picarray;
@@ -31,18 +30,7 @@ public class Codebook
 		}
 		indexarray=new int[(mywidth/8)*(myheight/8)];
 		diffarray=new int[(mywidth/8)*(myheight/8)];
-		randomcode();
 		compress(rgbarray.colorarray);
-	}
-	void randomcode()
-	{
-		for(int i=0;i<256;i++)
-		{
-			for(int j=0;j<4;j++)
-			{
-				codebook[i][j]=new Color(randomnum(),randomnum(),randomnum());
-			}
-		}
 	}
 	void compress(int[] picarraytemp)
 	{
@@ -55,6 +43,7 @@ public class Codebook
 			update();
 		}while(flag4changed);*/
 		DCT(YCbCrarray,0,0,0);
+		IDCT(dctarray,0,0,0);
 		System.out.println("Fin");
 	}
 	void assign()
@@ -106,17 +95,18 @@ public class Codebook
 		double[][] temp88=new double[8][8];
 		double temp=0,temp2=0;
 		int xx=0,yy=0,count=0;
-		for(int i=0;i<8;i++)
+
+		for(int j=0;j<8;j++)
 		{
-			for(int j=0;j<8;j++)
+			for(int i=0;i<8;i++)
 			{
 				temp88[i][j]=temparray[arrayindex(x,y,mywidth)][color];
-				System.out.print(temparray[arrayindex(x,y,mywidth)][color]+",");
 				x++;
 			}
 			y++;
 			x-=8;
 		}
+		y-=8;
 		do
 		{
 			temp=1;
@@ -138,11 +128,11 @@ public class Codebook
 				}
 				temp/=4;
 			}
-			for(int i=0;i<8;i++)
+			for(int j=0;j<8;j++)
 			{
-				for(int j=0;j<8;j++)
+				for(int i=0;i<8;i++)
 				{
-					temp2+=Math.cos(((2*i+1)*xx*Math.PI)/16)*Math.cos(((2*j+1)*yy*Math.PI)/16)*temp88[i][j];
+					temp2+=Math.cos(((2*j+1)*yy*Math.PI)/16)*Math.cos(((2*i+1)*xx*Math.PI)/16)*temp88[i][j];
 				}
 			}
 			temp*=temp2;
@@ -158,6 +148,69 @@ public class Codebook
 				y++;
 			}
 		}while(count!=64);
+	}
+	void IDCT(double[][] temparray,int x,int y,int color)
+	{
+		double[][] temp88=new double[8][8];
+		double temp=0,temp2=0;
+		int xx=0,yy=0,count=0;
+		for(int j=0;j<8;j++)
+		{
+			for(int i=0;i<8;i++)
+			{
+				temp88[i][j]=temparray[arrayindex(x,y,mywidth)][color];
+				x++;
+			}
+			y++;
+			x-=8;
+		}
+		y-=8;
+		System.out.println();
+		System.out.print("IDCT[");
+		do
+		{
+			temp=1;
+			temp2=0;
+			for(int j=0;j<8;j++)
+			{
+				for(int i=0;i<8;i++)
+				{
+					temp=1;
+					if(i==0)
+					{
+						temp=(Math.sqrt(2)/2);
+						if(j==0)
+						{
+							temp*=(Math.sqrt(2)/2);
+						}
+						temp/=4;
+					}
+					else
+					{
+						if(j==0)
+						{
+							temp*=(Math.sqrt(2)/2);
+						}
+						temp/=4;
+					}
+					temp2+=temp*Math.cos(((2*yy+1)*j*Math.PI)/16)*Math.cos(((2*xx+1)*i*Math.PI)/16)*temp88[i][j];
+				}
+			}
+			//dctarray[arrayindex(x,y,mywidth)][color]=temp2;
+			System.out.print(temp2+",");
+			x++;
+			xx++;
+			count++;
+			if(count%8==0)
+			{
+				System.out.println();
+				x-=8;
+				xx-=8;
+				yy++;
+				y++;
+			}
+		}while(count!=64);
+		System.out.print("]");
 	}
 	int arrayindex(int x,int y,int width)
 	{
