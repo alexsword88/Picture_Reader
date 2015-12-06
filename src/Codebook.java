@@ -169,7 +169,6 @@ public class Codebook
 		System.out.print("IDCT[");
 		do
 		{
-			temp=1;
 			temp2=0;
 			for(int j=0;j<8;j++)
 			{
