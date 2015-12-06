@@ -43,7 +43,8 @@ public class Codebook
 			update();
 		}while(flag4changed);*/
 		DCT(YCbCrarray,0,0,0);
-		IDCT(dctarray,0,0,0);
+		//yuvtorgb(dctarray);
+		
 		System.out.println("Fin");
 	}
 	void assign()
@@ -72,7 +73,7 @@ public class Codebook
 		{
 			if(index<=rgbarray.mywidth&&index<=mywidth)
 			{
-				YCbCrarray[i][0]=0.299*temp4depart[i][0]+0.587*temp4depart[i][1]+0.144*temp4depart[i][2];
+				YCbCrarray[i][0]=0.299*temp4depart[i][0]+0.587*temp4depart[i][1]+0.114*temp4depart[i][2];
 				YCbCrarray[i][1]=0.564*(temp4depart[i][2]-YCbCrarray[i][0]);
 				YCbCrarray[i][2]=0.713*(temp4depart[i][0]-YCbCrarray[i][0]);
 			}
@@ -90,12 +91,26 @@ public class Codebook
 			index++;
 		}
 	}
+	void yuvtorgb(double[][] array)
+	{
+		int index=0;
+		for(int i=0;i<rgbarray.myheight;i++)
+		{
+			for(int j=0;j<rgbarray.mywidth;j++)
+			{
+				rgbarray.colorarray[index]=new Color(
+									Math.round((float)(array[arrayindex(j,i,mywidth)][0]+1.402*array[arrayindex(j,i,mywidth)][2])),
+									Math.round((float)(array[arrayindex(j,i,mywidth)][0]-0.344*array[arrayindex(j,i,mywidth)][1]-0.714*array[arrayindex(j,i,mywidth)][2])),
+									Math.round((float)(array[arrayindex(j,i,mywidth)][0]+1.772*array[arrayindex(j,i,mywidth)][1]))).getRGB();
+				index++;
+			}
+		}
+	}
 	void DCT(double[][] temparray,int x,int y,int color)
 	{
 		double[][] temp88=new double[8][8];
 		double temp=0,temp2=0;
 		int xx=0,yy=0,count=0;
-
 		for(int j=0;j<8;j++)
 		{
 			for(int i=0;i<8;i++)
@@ -132,7 +147,7 @@ public class Codebook
 			{
 				for(int i=0;i<8;i++)
 				{
-					temp2+=Math.cos(((2*j+1)*yy*Math.PI)/16)*Math.cos(((2*i+1)*xx*Math.PI)/16)*temp88[i][j];
+					temp2+=Math.cos(((2*j+1)*yy*Math.PI)/16)*Math.cos(((2*i+1)*xx*Math.PI)/16)*temp88[j][i];
 				}
 			}
 			temp*=temp2;
@@ -165,8 +180,6 @@ public class Codebook
 			x-=8;
 		}
 		y-=8;
-		System.out.println();
-		System.out.print("IDCT[");
 		do
 		{
 			temp2=0;
@@ -192,24 +205,21 @@ public class Codebook
 						}
 						temp/=4;
 					}
-					temp2+=temp*Math.cos(((2*yy+1)*j*Math.PI)/16)*Math.cos(((2*xx+1)*i*Math.PI)/16)*temp88[i][j];
+					temp2+=temp*Math.cos(((2*yy+1)*j*Math.PI)/16)*Math.cos(((2*xx+1)*i*Math.PI)/16)*temp88[j][i];
 				}
 			}
-			//dctarray[arrayindex(x,y,mywidth)][color]=temp2;
-			System.out.print(temp2+",");
+			dctarray[arrayindex(x,y,mywidth)][color]=temp2;
 			x++;
 			xx++;
 			count++;
 			if(count%8==0)
 			{
-				System.out.println();
 				x-=8;
 				xx-=8;
 				yy++;
 				y++;
 			}
 		}while(count!=64);
-		System.out.print("]");
 	}
 	int arrayindex(int x,int y,int width)
 	{
