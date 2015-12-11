@@ -160,7 +160,6 @@ public class Codebook
 			x-=8;
 		}
 		y-=8;
-		System.out.println(temp88[0][0]);
 		do
 		{
 			temp=1;
