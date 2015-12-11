@@ -3,7 +3,7 @@ import java.util.*;
 public class Codebook
 {
 	int[][] temp4depart;
-	double[][] YCbCrarray,dctarray;
+	double[][] YCbCrarray,dctarray,idctarray;
 	int[] indexarray,diffarray,picarray;
 	boolean flag4changed=false;
 	RGBarray rgbarray;
@@ -15,17 +15,17 @@ public class Codebook
 		myheight=rgbarray.myheight;
 		if(mywidth%8!=0)
 		{
-			mywidth-=(mywidth%8);
+			mywidth+=(8-(mywidth%8));
 			if(myheight%8!=0)
 			{
-				myheight+=(myheight%8);
+				myheight+=(8-(myheight%8));
 			}
 		}
 		else
 		{
 			if(myheight%8!=0)
 			{
-				myheight+=(myheight%8);
+				myheight+=(8-(myheight%8));
 			}
 		}
 		indexarray=new int[(mywidth/8)*(myheight/8)];
@@ -35,6 +35,8 @@ public class Codebook
 	void compress(int[] picarraytemp)
 	{
 		picarray=picarraytemp;
+		System.out.println(mywidth*myheight);
+		System.out.println(mywidth+","+myheight);
 		rgbtoyuv(picarray,picarray.length);
 		/*do
 		{
@@ -42,8 +44,23 @@ public class Codebook
 			assign();
 			update();
 		}while(flag4changed);*/
-		DCT(YCbCrarray,0,0,0);
-		//yuvtorgb(dctarray);
+		int count=0;
+		fullDCT(YCbCrarray,0);
+		count=0;
+		/*System.out.print("[");
+		for(int i=0;i<YCbCrarray.length;i++)
+		{
+			System.out.print(YCbCrarray[i][0]+",");
+				if(count%8==0)
+				{
+					System.out.println();
+				}
+				count++;
+		}
+		System.out.print("\b ");
+		System.out.print("]");*/
+		fullIDCT(dctarray,0);
+		yuvtorgb(idctarray);
 		
 		System.out.println("Fin");
 	}
@@ -60,6 +77,7 @@ public class Codebook
 		temp4depart=new int[length][3];
 		YCbCrarray=new double[mywidth*myheight][3];
 		dctarray=new double[mywidth*myheight][3];
+		idctarray=new double[mywidth*myheight][3];
 		int index=0;
 		for(int i:array)
 		{
@@ -71,24 +89,23 @@ public class Codebook
 		index=0;
 		for(int i=0;i<mywidth*myheight;i++)
 		{
-			if(index<=rgbarray.mywidth&&index<=mywidth)
+			if(((index%rgbarray.mywidth)!=(rgbarray.mywidth-1))&&(index<rgbarray.mywidth))
 			{
-				YCbCrarray[i][0]=0.299*temp4depart[i][0]+0.587*temp4depart[i][1]+0.114*temp4depart[i][2];
-				YCbCrarray[i][1]=0.564*(temp4depart[i][2]-YCbCrarray[i][0]);
-				YCbCrarray[i][2]=0.713*(temp4depart[i][0]-YCbCrarray[i][0]);
+				YCbCrarray[i][0]=0.299*temp4depart[index][0]+0.587*temp4depart[index][1]+0.114*temp4depart[index][2];
+				YCbCrarray[i][1]=0.564*(temp4depart[index][2]-YCbCrarray[i][0]);
+				YCbCrarray[i][2]=0.713*(temp4depart[index][0]-YCbCrarray[i][0]);
+				index++;
 			}
 			else
 			{
 				YCbCrarray[i][0]=0;
 				YCbCrarray[i][1]=0;
 				YCbCrarray[i][2]=0;
+				if((i%mywidth)==(mywidth-1))
+				{
+					index++;
+				}
 			}
-			if(index==mywidth)
-			{
-				index=0;
-				continue;
-			}
-			index++;
 		}
 	}
 	void yuvtorgb(double[][] array)
@@ -106,11 +123,32 @@ public class Codebook
 			}
 		}
 	}
+	void fullDCT(double[][] temparray,int color)
+	{
+		for(int y=0;y<myheight;y+=8)
+		{
+			for(int x=0;x<mywidth;x+=8)
+			{
+				DCT(temparray,x,y,color);
+			}
+		}
+	}
+	void fullIDCT(double[][] temparray,int color)
+	{
+		for(int y=0;y<myheight;y+=8)
+		{
+			for(int x=0;x<mywidth;x+=8)
+			{
+				IDCT(temparray,x,y,color);
+			}
+		}
+	}
 	void DCT(double[][] temparray,int x,int y,int color)
 	{
 		double[][] temp88=new double[8][8];
 		double temp=0,temp2=0;
 		int xx=0,yy=0,count=0;
+		System.out.println("ZZZ:"+x+","+y);
 		for(int j=0;j<8;j++)
 		{
 			for(int i=0;i<8;i++)
@@ -122,6 +160,7 @@ public class Codebook
 			x-=8;
 		}
 		y-=8;
+		System.out.println(temp88[0][0]);
 		do
 		{
 			temp=1;
@@ -208,7 +247,7 @@ public class Codebook
 					temp2+=temp*Math.cos(((2*yy+1)*j*Math.PI)/16)*Math.cos(((2*xx+1)*i*Math.PI)/16)*temp88[j][i];
 				}
 			}
-			dctarray[arrayindex(x,y,mywidth)][color]=temp2;
+			idctarray[arrayindex(x,y,mywidth)][color]=temp2;
 			x++;
 			xx++;
 			count++;
