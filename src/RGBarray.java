@@ -23,6 +23,7 @@ class RGBarray
 			if(!flag4codebook)
 			{
 				codebook=new Codebook(this);
+				flag4codebook=true;
 			}
 		}
 		public void analysis()

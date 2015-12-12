@@ -42,9 +42,15 @@ public class Codebook
 			assign();
 			update();
 		}while(flag4changed);*/
-		fullDCT(YCbCrarray,0);
-		fullIDCT(dctarray,0);
-		yuvtorgb(idctarray);
+		//fullDCT(YCbCrarray,0);
+		//fullIDCT(dctarray,0);
+		for(int i=100;i<200;i++)
+		{
+			YCbCrarray[i][0]=0;
+			YCbCrarray[i][1]=0;
+			YCbCrarray[i][2]=0;
+		}
+		yuvtorgb(YCbCrarray,picarray.length);
 	}
 	void assign()
 	{
@@ -90,19 +96,27 @@ public class Codebook
 			}
 		}
 	}
-	void yuvtorgb(double[][] array)
+	void yuvtorgb(double[][] array,int length)
 	{
 		int index=0;
-		for(int i=0;i<rgbarray.mywidth*rgbarray.myheight;i++)
+		for(int i=0;i<mywidth*myheight;i++)
 		{
-			if((index%rgbarray.mywidth)!=(rgbarray.mywidth-1))
+			if(((i%rgbarray.mywidth)!=(rgbarray.mywidth-1))&&(index<length-1))
 			{
-				rgbarray.colorarray[i]=new Color(
-						Math.round((float)(array[index][0]+1.402*array[index][2])),
-						Math.round((float)(array[index][0]-0.344*array[index][1]-0.714*array[index][2])),
-						Math.round((float)(array[index][0]+1.772*array[index][1]))).getRGB();
+				rgbarray.colorarray[index]=new Color(
+						Math.round((float)(array[i][0]+1.402*array[i][2])),
+						Math.round((float)(array[i][0]-0.344*array[i][1]-0.714*array[i][2])),
+						Math.round((float)(array[i][0]+1.772*array[i][1]))).getRGB();
 				index++;
 			}
+			else
+			{
+				if((i%mywidth)==(mywidth-1))
+				{
+					index++;
+				}
+			}
+			
 		}
 	}
 	void fullDCT(double[][] temparray,int color)
