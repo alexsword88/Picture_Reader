@@ -35,8 +35,6 @@ public class Codebook
 	void compress(int[] picarraytemp)
 	{
 		picarray=picarraytemp;
-		System.out.println(mywidth*myheight);
-		System.out.println(mywidth+","+myheight);
 		rgbtoyuv(picarray,picarray.length);
 		/*do
 		{
@@ -44,25 +42,9 @@ public class Codebook
 			assign();
 			update();
 		}while(flag4changed);*/
-		int count=0;
 		fullDCT(YCbCrarray,0);
-		count=0;
-		/*System.out.print("[");
-		for(int i=0;i<YCbCrarray.length;i++)
-		{
-			System.out.print(YCbCrarray[i][0]+",");
-				if(count%8==0)
-				{
-					System.out.println();
-				}
-				count++;
-		}
-		System.out.print("\b ");
-		System.out.print("]");*/
 		fullIDCT(dctarray,0);
 		yuvtorgb(idctarray);
-		
-		System.out.println("Fin");
 	}
 	void assign()
 	{
@@ -89,7 +71,7 @@ public class Codebook
 		index=0;
 		for(int i=0;i<mywidth*myheight;i++)
 		{
-			if(((index%rgbarray.mywidth)!=(rgbarray.mywidth-1))&&(index<rgbarray.mywidth))
+			if(((i%rgbarray.mywidth)!=(rgbarray.mywidth-1))&&(index<length-1))
 			{
 				YCbCrarray[i][0]=0.299*temp4depart[index][0]+0.587*temp4depart[index][1]+0.114*temp4depart[index][2];
 				YCbCrarray[i][1]=0.564*(temp4depart[index][2]-YCbCrarray[i][0]);
@@ -111,14 +93,14 @@ public class Codebook
 	void yuvtorgb(double[][] array)
 	{
 		int index=0;
-		for(int i=0;i<rgbarray.myheight;i++)
+		for(int i=0;i<rgbarray.mywidth*rgbarray.myheight;i++)
 		{
-			for(int j=0;j<rgbarray.mywidth;j++)
+			if((index%rgbarray.mywidth)!=(rgbarray.mywidth-1))
 			{
-				rgbarray.colorarray[index]=new Color(
-									Math.round((float)(array[arrayindex(j,i,mywidth)][0]+1.402*array[arrayindex(j,i,mywidth)][2])),
-									Math.round((float)(array[arrayindex(j,i,mywidth)][0]-0.344*array[arrayindex(j,i,mywidth)][1]-0.714*array[arrayindex(j,i,mywidth)][2])),
-									Math.round((float)(array[arrayindex(j,i,mywidth)][0]+1.772*array[arrayindex(j,i,mywidth)][1]))).getRGB();
+				rgbarray.colorarray[i]=new Color(
+						Math.round((float)(array[index][0]+1.402*array[index][2])),
+						Math.round((float)(array[index][0]-0.344*array[index][1]-0.714*array[index][2])),
+						Math.round((float)(array[index][0]+1.772*array[index][1]))).getRGB();
 				index++;
 			}
 		}
@@ -148,7 +130,6 @@ public class Codebook
 		double[][] temp88=new double[8][8];
 		double temp=0,temp2=0;
 		int xx=0,yy=0,count=0;
-		System.out.println("ZZZ:"+x+","+y);
 		for(int j=0;j<8;j++)
 		{
 			for(int i=0;i<8;i++)
