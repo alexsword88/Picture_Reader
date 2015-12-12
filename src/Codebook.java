@@ -42,15 +42,9 @@ public class Codebook
 			assign();
 			update();
 		}while(flag4changed);*/
-		//fullDCT(YCbCrarray,0);
-		//fullIDCT(dctarray,0);
-		for(int i=100;i<200;i++)
-		{
-			YCbCrarray[i][0]=0;
-			YCbCrarray[i][1]=0;
-			YCbCrarray[i][2]=0;
-		}
-		yuvtorgb(YCbCrarray,picarray.length);
+		fullDCT(YCbCrarray);
+		fullIDCT(dctarray);
+		yuvtorgb(idctarray,picarray.length);
 	}
 	void assign()
 	{
@@ -74,6 +68,12 @@ public class Codebook
 			temp4depart[index][2]=new Color(i).getBlue();
 			index++;
 		}
+		System.out.println("[");
+		for(int i=0;i<64;i++)
+		{
+			System.out.print(temp4depart[i][0]+",");
+		}
+		System.out.println("]");
 		index=0;
 		for(int i=0;i<mywidth*myheight;i++)
 		{
@@ -119,23 +119,29 @@ public class Codebook
 			
 		}
 	}
-	void fullDCT(double[][] temparray,int color)
+	void fullDCT(double[][] temparray)
 	{
-		for(int y=0;y<myheight;y+=8)
+		for(int z=0;z<3;z++)
 		{
-			for(int x=0;x<mywidth;x+=8)
+			for(int y=0;y<myheight;y+=8)
 			{
-				DCT(temparray,x,y,color);
+				for(int x=0;x<mywidth;x+=8)
+				{
+					DCT(temparray,x,y,z);
+				}
 			}
 		}
 	}
-	void fullIDCT(double[][] temparray,int color)
+	void fullIDCT(double[][] temparray)
 	{
-		for(int y=0;y<myheight;y+=8)
+		for(int z=0;z<3;z++)
 		{
-			for(int x=0;x<mywidth;x+=8)
+			for(int y=0;y<myheight;y+=8)
 			{
-				IDCT(temparray,x,y,color);
+				for(int x=0;x<mywidth;x+=8)
+				{
+					IDCT(temparray,x,y,z);
+				}
 			}
 		}
 	}
