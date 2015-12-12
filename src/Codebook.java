@@ -2,17 +2,19 @@ import java.awt.Color;
 import java.util.*;
 public class Codebook
 {
-	int[][] temp4depart;
-	double[][] YCbCrarray,dctarray,idctarray;
+	int[][] temp4depart,newpicarray;
+	double[][] YCbCrarray,dctarray,idctarray,codebook;
 	int[] indexarray,diffarray,picarray;
 	boolean flag4changed=false;
 	RGBarray rgbarray;
-	int mywidth,myheight;
+	int mywidth,myheight,lbgwidth,lbgheight;
 	Codebook(RGBarray temp)
 	{
 		rgbarray=temp;
 		mywidth=rgbarray.mywidth;
 		myheight=rgbarray.myheight;
+		lbgwidth=rgbarray.mywidth;
+		lbgheight=rgbarray.myheight;
 		if(mywidth%8!=0)
 		{
 			mywidth+=(8-(mywidth%8));
@@ -28,20 +30,85 @@ public class Codebook
 				myheight+=(8-(myheight%8));
 			}
 		}
-		indexarray=new int[(mywidth/8)*(myheight/8)];
-		diffarray=new int[(mywidth/8)*(myheight/8)];
-		compress(rgbarray.colorarray);
+		picarray=rgbarray.colorarray;
+		colordepart(picarray,picarray.length);
+		LBG();
+		//jpegcompress();
 	}
-	void compress(int[] picarraytemp)
+	void LBG()
 	{
-		picarray=picarraytemp;
-		rgbtoyuv(picarray,picarray.length);
-		/*do
+		if(lbgwidth%4!=0)
+		{
+			lbgwidth+=(4-(lbgwidth%4));
+			if(lbgheight%4!=0)
+			{
+				lbgheight+=(4-(lbgheight%4));
+			}
+		}
+		else
+		{
+			if(myheight%4!=0)
+			{
+				lbgheight+=(4-(lbgheight%4));
+			}
+		}
+		newpicarray=new int[lbgheight/4*lbgwidth/4][16];
+		int[] temparray=new int[lbgheight*lbgwidth];
+		int index=0;
+		for(int i=0;i<temparray.length;i++)
+		{
+			if(((i%rgbarray.mywidth)!=(rgbarray.mywidth-1))&&(index<picarray.length-1))
+			{
+				temparray[i]=temp4depart[index][0];
+				index++;
+			}
+			else
+			{
+				temparray[i]=0;
+				if((i%mywidth)==(mywidth-1))
+				{
+					index++;
+				}
+			}
+		}
+		int x=0,y=0,xx=0,yy=0;
+		for(int i=0;i<lbgheight/4*lbgwidth/4;i++)
+		{
+			x=0;
+			y=0;
+			for(int j=0;j<16;j++)
+			{
+				newpicarray[i][j]=temparray[arrayindex(xx+x,yy+y,lbgwidth)];
+				if(x/3==1)
+				{
+					x=0;
+					y++;
+				}
+				else
+				{
+					x++;
+				}
+			}
+			if(xx+4<lbgwidth)
+			{
+				xx+=4;				
+			}
+			else
+			{
+				xx=0;
+				yy+=4;
+			}
+		}
+		do
 		{
 			flag4changed=false;
 			assign();
 			update();
-		}while(flag4changed);*/
+		}while(flag4changed);
+	}
+	void jpegcompress()
+	{
+		rgbtoyuv(picarray,picarray.length);
 		fullDCT(YCbCrarray);
 		fullIDCT(dctarray);
 		yuvtorgb(idctarray,picarray.length);
@@ -54,13 +121,10 @@ public class Codebook
 	{
 		
 	}
-	void rgbtoyuv(int[] array,int length)
+	void colordepart(int[] array,int length)
 	{
-		temp4depart=new int[length][3];
-		YCbCrarray=new double[mywidth*myheight][3];
-		dctarray=new double[mywidth*myheight][3];
-		idctarray=new double[mywidth*myheight][3];
 		int index=0;
+		temp4depart=new int[length][3];
 		for(int i:array)
 		{
 			temp4depart[index][0]=new Color(i).getRed();
@@ -68,13 +132,13 @@ public class Codebook
 			temp4depart[index][2]=new Color(i).getBlue();
 			index++;
 		}
-		System.out.println("[");
-		for(int i=0;i<64;i++)
-		{
-			System.out.print(temp4depart[i][0]+",");
-		}
-		System.out.println("]");
-		index=0;
+	}
+	void rgbtoyuv(int[] array,int length)
+	{
+		YCbCrarray=new double[mywidth*myheight][3];
+		dctarray=new double[mywidth*myheight][3];
+		idctarray=new double[mywidth*myheight][3];
+		int index=0;
 		for(int i=0;i<mywidth*myheight;i++)
 		{
 			if(((i%rgbarray.mywidth)!=(rgbarray.mywidth-1))&&(index<length-1))
