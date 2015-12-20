@@ -18,11 +18,11 @@ class Showfr extends Frame implements ActionListener
 		CardLayout cardl=new CardLayout();
 		void menuitil()
 		{
-			menuitem=new MenuItem("90¢X Rotate");
+			menuitem=new MenuItem("90Â° Rotate");
 			menuitem.setActionCommand("90");
 			menuitem.addActionListener(this);
 			rightmenu.add(menuitem);
-			menuitem=new MenuItem("-90¢X Rotate");
+			menuitem=new MenuItem("-90Â° Rotate");
 			menuitem.setActionCommand("-90");
 			menuitem.addActionListener(this);
 			rightmenu.add(menuitem);
@@ -44,6 +44,10 @@ class Showfr extends Frame implements ActionListener
 			rightmenu.add(menuitem);
 			menuitem=new MenuItem("Color Reverse");
 			menuitem.setActionCommand("20");
+			menuitem.addActionListener(this);
+			rightmenu.add(menuitem);
+			menuitem=new MenuItem("Mosaic Picture");
+			menuitem.setActionCommand("30");
 			menuitem.addActionListener(this);
 			rightmenu.add(menuitem);
 			menuitem=new MenuItem("Show Analysis");

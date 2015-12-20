@@ -8,6 +8,7 @@ class RGBarray
 		int mywidth=0,myheight=0,userwidth=0,userheight=0,Rmax=0,Gmax=0,Bmax=0;
 		BufferedImage img;
 		Codebook codebook;
+		Showfr showfr;
 		boolean flag4codebook=false;
 		RGBarray(BufferedImage temp)
 		{
@@ -61,6 +62,10 @@ class RGBarray
 				}
 			}
 		}
+		public void input(Showfr temp)
+		{
+			showfr=temp;
+		}
 		public void convert(int x)
 		{
 			int[][] temparr=new int[myheight][mywidth];
@@ -103,7 +108,8 @@ class RGBarray
 					}
 					break;
 				case 30:
-					
+					codebook.LBG();
+					break;
 				case 50:
 					for(int i=0;i<colorarray.length-1;i++)
 					{

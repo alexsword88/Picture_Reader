@@ -69,6 +69,7 @@ public class reader implements ActionListener
 				img =ImageIO.read(new File(targetfile+targetfilename));
 				array=new RGBarray(img);
 				ab=new Showfr(array);
+				array.input(ab);
 			}
 			catch(IOException e)
 			{
