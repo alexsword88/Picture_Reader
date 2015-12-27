@@ -5,7 +5,7 @@ public class Processbar extends Frame
 {
 	private static final long serialVersionUID = 127L;
 	Label test=new Label("TEST");
-	int percentnow=0;
+	float percentnow=0,subnumber=1;
 	Processbar(int x,int y)
 	{
 		this.setTitle("Process");
@@ -19,12 +19,16 @@ public class Processbar extends Frame
 	{
 		this.setVisible(true);
 		percentnow=0;
-		test.setText("Processing...."+percentnow+"%");
+		test.setText("Processing...."+(int)percentnow+"%");
 	}
 	void increase()
 	{
-		percentnow++;
-		test.setText("Processing...."+percentnow+"%");
+		percentnow+=subnumber;
+		test.setText("Processing...."+(int)percentnow+"%");
+	}
+	void totaltimes(int times)
+	{
+		subnumber=(float)100/times;
 	}
 	void done()
 	{

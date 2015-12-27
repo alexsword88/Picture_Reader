@@ -8,6 +8,7 @@ public class Codebook
 	RGBarray rgbarray;
 	int mywidth,myheight,lbgwidth,lbgheight,lbgdiff;
 	Processbar process;
+	dctshower dctshow;
 	Codebook(RGBarray temp)
 	{
 		rgbarray=temp;
@@ -168,6 +169,13 @@ public class Codebook
 		fullDCT(YCbCrarray);
 		fullIDCT(dctarray);
 		yuvtorgb(idctarray,picarray.length);
+	}
+	void showdct()
+	{
+		rgbtoyuv(picarray,picarray.length);
+		process=new Processbar(rgbarray.showfr.getX(),rgbarray.showfr.getY());
+		fullDCT(YCbCrarray);
+		dctshow=new dctshower(dctarray,mywidth,myheight);
 	}
 	void assign()
 	{
@@ -335,16 +343,21 @@ public class Codebook
 	}
 	void fullDCT(double[][] temparray)
 	{
+		process.open();
+		process.totaltimes(myheight/8*mywidth/8*3);
 		for(int z=0;z<3;z++)
 		{
 			for(int y=0;y<myheight;y+=8)
 			{
 				for(int x=0;x<mywidth;x+=8)
 				{
+					process.increase();
 					DCT(temparray,x,y,z);
 				}
 			}
 		}
+		process.done();
+		process.dispose();
 	}
 	void fullIDCT(double[][] temparray)
 	{

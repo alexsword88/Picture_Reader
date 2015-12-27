@@ -60,6 +60,11 @@ class Showfr extends Frame implements ActionListener
 			submenu.add(menuitem);
 			rightmenu.add(submenu);
 			rightmenu.addSeparator();
+			menuitem=new MenuItem("Show DCT");
+			menuitem.setActionCommand("40");
+			menuitem.addActionListener(this);
+			rightmenu.add(menuitem);
+			rightmenu.addSeparator();
 			menuitem=new MenuItem("Show Analysis");
 			menuitem.setActionCommand("Analy");
 			menuitem.addActionListener(this);

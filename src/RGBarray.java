@@ -110,6 +110,9 @@ class RGBarray
 				case 30:
 					codebook.LBG();
 					break;
+				case 40:
+					codebook.showdct();
+					break;
 				case 50:
 					for(int i=0;i<colorarray.length-1;i++)
 					{
