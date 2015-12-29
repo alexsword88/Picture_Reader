@@ -1,26 +1,32 @@
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.JLabel;
 
 public class dctshower extends Frame implements ActionListener,ItemListener
 {
-	Panel pl1=new Panel(),pl2=new Panel(),pl3=new Panel(),mainpanel=new Panel();
-	Panel[] allpanel={pl1,pl2,pl3};;
+	panel4dct pl1,pl2,pl3;
+	Panel mainpanel=new Panel();
+	panel4dct[] allpanel=new panel4dct[3];
 	Boolean[] panelseted={false,false,false};
 	Button left=new Button("<"),right=new Button(">");
 	Choice showwhat=new Choice();
-	JLabel[][] cardlabel;
 	CardLayout card=new CardLayout();
 	double[][] dctarray;
-	int dctwidth,dctheight,index4card=0,maxindex=0,nowpanelindex=0;
+	int dctwidth,dctheight,cardx=0,cardy=0,maxindex,nowpanelindex=0;
 	Processbar processbar;
 	dctshower(double[][] temp,int tempwidth,int tempheight)
 	{
 		dctwidth=tempwidth;
 		dctheight=tempheight;
 		dctarray=temp;
+		maxindex=dctwidth/8*dctheight/8;
+		pl1=new panel4dct(0);
+		allpanel[0]=pl1;
+		pl2=new panel4dct(1);
+		allpanel[1]=pl2;
+		pl3=new panel4dct(2);
+		allpanel[2]=pl3;
 		buttonsetting();
-		this.setBounds(200,200,700,520);
+		this.setBounds(200,200,700,470);
 		this.setLayout(null);
 		this.setResizable(true);
 		this.add(left);
@@ -28,10 +34,10 @@ public class dctshower extends Frame implements ActionListener,ItemListener
 		showwhat.add("Y");
 		showwhat.add("Cb");
 		showwhat.add("Cr");
-		showwhat.setBounds(280,480,100,100);
+		showwhat.setBounds(280,430,100,100);
 		showwhat.addItemListener(this);
 		this.addWindowListener(new closeX());
-		mainpanel.setBounds(53,30,600,450);
+		mainpanel.setBounds(53,35,590,390);
 		mainpanel.setLayout(card);
 		pl1.setLayout(card);
 		pl2.setLayout(card);
@@ -39,91 +45,46 @@ public class dctshower extends Frame implements ActionListener,ItemListener
 		mainpanel.add(pl1,"Y");
 		mainpanel.add(pl2,"Cb");
 		mainpanel.add(pl3,"Cr");
-		cardlabel=new JLabel[dctarray.length][3];
 		this.add(mainpanel);
 		this.add(showwhat);
-		dctset(0);
 		this.setVisible(true);
 	}
 	void buttonsetting()
 	{
-		left.setBounds(0,10,50,510);
+		left.setBounds(0,10,50,460);
 		left.setActionCommand("left");
 		left.addActionListener(this);
-		right.setBounds(648,10,50,510);
+		right.setBounds(648,10,50,460);
 		right.setActionCommand("right");
 		right.addActionListener(this);
-		if(index4card==0)
-		{
-			left.setEnabled(false);
-		}
-	}
-	void dctset(int color)
-	{
-		processbar=new Processbar(100,100);
-		processbar.open();
-		processbar.totaltimes(dctheight/8*dctwidth/8);
-		maxindex=0;
-		for(int y=0,labelindex=0;y<dctheight;y+=8)
-		{
-			for(int x=0;x<dctwidth;x+=8,labelindex++)
-			{
-				processbar.increase();
-				cardlabel[labelindex][color]=new JLabel(turnstring(x,y,color));
-				allpanel[color].add(cardlabel[labelindex][color],maxindex);
-				maxindex++;
-				System.out.println("TEST:"+x+":"+y+":"+color);
-			}
-		}
-		processbar.done();
-		processbar.dispose();
+		left.setEnabled(false);
 		if(maxindex==1)
 		{
 			right.setEnabled(false);
 		}
-		panelseted[color]=true;
-	}
-	String turnstring(int x,int y,int color)
-	{
-		String target="<html><table border=1 style="+'"'+"font-size:22px;width:450px"+'"'+">";
-		for(int i=0;i<8;i++)
-		{
-			target+="<tr>";
-			for(int j=0;j<8;j++)
-			{
-				target+="<td>";
-				target+=Math.round((float)(dctarray[arrayindex(x+j,y+i,dctwidth)][color]));
-				target+="</td>";
-			}
-			target+="</tr>";
-		}
-		target+="</table></html>";
-		return target;
 	}
 	public void actionPerformed(ActionEvent e)
 	{
 		if(e.getActionCommand()=="right")
 		{
-			card.next(allpanel[nowpanelindex]);
-			index4card++;
-			if(index4card!=0)
+			allpanel[nowpanelindex].right();
+			if(cardx!=0&&cardy>=0)
 			{
 				left.setEnabled(true);
 			}
-			else if(index4card==maxindex-1)
+			if(cardx>dctwidth&&cardy>dctheight)
 			{
 				right.setEnabled(false);
 			}
 		}
 		else
 		{
-			card.previous(allpanel[nowpanelindex]);
-			index4card--;
-			if(index4card==0)
+			allpanel[nowpanelindex].left();
+			if(cardx==0&&cardy==0)
 			{
 				left.setEnabled(false);
 			}
-			else if(index4card<maxindex-1)
+			if(cardx<dctwidth&&cardy<dctheight)
 			{
 				right.setEnabled(true);
 			}
@@ -132,7 +93,6 @@ public class dctshower extends Frame implements ActionListener,ItemListener
 	public void itemStateChanged(ItemEvent e)
 	{
 		String temp=((Choice)e.getSource()).getSelectedItem();
-		
 		if(temp=="Y")
 		{
 			nowpanelindex=0;
@@ -145,11 +105,6 @@ public class dctshower extends Frame implements ActionListener,ItemListener
 		{
 			nowpanelindex=2;
 		}
-		if(!panelseted[nowpanelindex])
-		{
-			dctset(nowpanelindex);
-		}
-		card.show(allpanel[nowpanelindex],String.valueOf(index4card));
 		card.show(mainpanel,temp);
 	}
 	int arrayindex(int x,int y,int width)
@@ -161,6 +116,57 @@ public class dctshower extends Frame implements ActionListener,ItemListener
 		public void windowClosing(WindowEvent e)
 		{
 			dispose();
+		}
+	}
+	class panel4dct extends Panel
+	{
+		int panelno,x=20,y=30;
+		Font myfont=new Font("Calibri",Font.BOLD,25);
+		panel4dct(int temp)
+		{
+			panelno=temp;
+			this.setBounds(0,0,590,450);
+			this.setLayout(null);
+		}
+		public void paint(Graphics g)
+		{
+			g.setColor(new Color(255,255,255));
+			g.fillRect(0,0,590,450);
+			g.setColor(new Color(0,0,0));
+			g.setFont(myfont);
+			for(int yy=0,controly=0;yy<8*50;yy+=50,controly++)
+			{
+				for(int xx=0,controlx=0;xx<8*70;xx+=70,controlx++)
+				{
+					g.drawString(String.valueOf((int)(dctarray[arrayindex(cardx+controlx,cardy+controly,dctwidth)][panelno])), x+xx, y+yy);
+				}
+			}
+		}
+		void right()
+		{
+			if(cardx<dctwidth)
+			{
+				cardx+=8;
+			}
+			else
+			{
+				cardx=0;
+				cardy+=8;
+			}
+			repaint();
+		}
+		void left()
+		{
+			if(cardx>0)
+			{
+				cardx-=8;
+			}
+			else
+			{
+				cardx=0;
+				cardy-=8;
+			}
+			repaint();
 		}
 	}
 }
