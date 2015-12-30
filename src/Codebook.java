@@ -77,7 +77,12 @@ public class Codebook
 				{
 					for(int z=0;z<lbgdiff;z++)
 					{
-						temparray[i+z][j]=0;
+						try
+						{
+							temparray[i+z][j]=0;
+						}
+						catch(ArrayIndexOutOfBoundsException e)
+						{}
 					}
 				}
 			}
