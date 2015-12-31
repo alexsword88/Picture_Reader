@@ -6,7 +6,7 @@ public class Codebook
 	double[][] YCbCrarray,dctarray,idctarray;
 	int[] indexarray,picarray;
 	RGBarray rgbarray;
-	int mywidth,myheight,lbgwidth,lbgheight,lbgdiff;
+	int mywidth,myheight,lbgwidth,lbgheight,lbgdiffwidth,lbgdiffheight;
 	Processbar process;
 	dctshower dctshow;
 	Codebook(RGBarray temp)
@@ -60,29 +60,52 @@ public class Codebook
 		newpicarrayg=new int[lbgheight/4*lbgwidth/4][16];
 		newpicarrayb=new int[lbgheight/4*lbgwidth/4][16];
 		indexarray=new int[lbgheight/4*lbgwidth/4];
-		lbgdiff=lbgwidth-rgbarray.mywidth;
+		lbgdiffwidth=lbgwidth-rgbarray.mywidth;
+		lbgdiffheight=lbgheight-rgbarray.myheight;
 		int[][] temparray=new int[lbgheight*lbgwidth][3];
 		int index=0;
 		for(int j=0;j<3;j++)
 		{
 			index=0;
-			for(int i=0;i<lbgheight*lbgwidth;i++)
+			for(int i=0,x=0,y=0;i<lbgheight*lbgwidth;i++,x++)
 			{
-				if(((i%lbgwidth)!=(lbgwidth-lbgdiff))&&((index<picarray.length-1)))
+				if((x!=lbgwidth-lbgdiffwidth-1)&&(y!=lbgheight-lbgdiffheight-1))
 				{
-					temparray[i][j]=temp4depart[index][j];
-					index++;
+					temparray[arrayindex(x,y,lbgwidth)][j]=temp4depart[arrayindex(x,y,rgbarray.mywidth)][j];
 				}
 				else
 				{
-					for(int z=0;z<lbgdiff;z++)
+					if(x==lbgwidth-lbgdiffwidth-1)
 					{
-						try
+						for(int z=0;z<lbgdiffwidth;z++)
 						{
-							temparray[i+z][j]=0;
+							try
+							{
+								temparray[arrayindex(x+z,y,lbgwidth)][j]=0;
+								
+							}
+							catch(ArrayIndexOutOfBoundsException e)
+							{System.out.println("EERROR");}
 						}
-						catch(ArrayIndexOutOfBoundsException e)
-						{}
+						x=-1;
+						y++;
+					}
+					else
+					{
+						for(int z=0;z<lbgdiffheight;z++)
+						{
+							for(int zz=0;zz<lbgwidth;zz++)
+							{
+								try
+								{
+									temparray[arrayindex(x+zz,y+z,lbgwidth)][j]=0;
+									
+								}
+								catch(ArrayIndexOutOfBoundsException e)
+								{System.out.println("EERROR");}
+							}
+						}
+						break;
 					}
 				}
 			}
@@ -155,7 +178,7 @@ public class Codebook
 		for(int i=0;i<100;i++)
 		{
 			assign();
-			update();
+			//update();
 			process.increase();
 		}
 		process.done();
@@ -276,12 +299,25 @@ public class Codebook
 			index++;
 		}
 		index=0;
-		for(int i=0;i<lbgheight*lbgwidth;i++)
+		x=0;
+		y=0;
+		for(int i=0;i<lbgheight*lbgwidth;i++,x++)
 		{
-			if(((i%lbgwidth)!=(lbgwidth-lbgdiff))&&((index<picarray.length-1)))
+			if((x!=lbgwidth-lbgdiffwidth-1)&&(y!=lbgheight-lbgdiffheight-1))
 			{
-				rgbarray.colorarray[index]=new Color(temparray[i][0],temparray[i][1],temparray[i][2]).getRGB();
-				index++;
+				rgbarray.colorarray[arrayindex(x,y,rgbarray.mywidth)]=new Color(temparray[arrayindex(x,y,lbgwidth)][0],temparray[arrayindex(x,y,lbgwidth)][1],temparray[arrayindex(x,y,lbgwidth)][2]).getRGB();
+			}
+			else
+			{
+				if(x==lbgwidth-lbgdiffwidth-1)
+				{
+					x=-1;
+					y++;
+				}
+				else
+				{
+					break;
+				}
 			}
 		}
 	}
