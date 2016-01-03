@@ -1,12 +1,22 @@
 import java.awt.Color;
+import java.awt.FileDialog;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.io.*;
+import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
 public class Codebook
 {
+	FileDialog savedialog;
 	int[][] temp4depart,newpicarrayr,newpicarrayg,newpicarrayb,codebookr,codebookg,codebookb;
 	double[][] YCbCrarray,dctarray,idctarray;
+	String[][] RLCarray;
+	String[] DPCMarray=new String[3];
 	int[] indexarray,picarray;
 	RGBarray rgbarray;
-	int mywidth,myheight,lbgwidth,lbgheight,lbgdiffwidth,lbgdiffheight;
+	int mywidth,myheight,lbgwidth,lbgheight,lbgdiffwidth,lbgdiffheight,dctdiffwidth,dctdiffheight;
 	Processbar process;
 	dctshower dctshow;
 	Codebook(RGBarray temp)
@@ -66,7 +76,6 @@ public class Codebook
 		int index=0;
 		for(int j=0;j<3;j++)
 		{
-			index=0;
 			for(int i=0,x=0,y=0;i<lbgheight*lbgwidth;i++,x++)
 			{
 				if((x!=lbgwidth-lbgdiffwidth-1)&&(y!=lbgheight-lbgdiffheight-1))
@@ -79,13 +88,7 @@ public class Codebook
 					{
 						for(int z=0;z<lbgdiffwidth;z++)
 						{
-							try
-							{
-								temparray[arrayindex(x+z,y,lbgwidth)][j]=0;
-								
-							}
-							catch(ArrayIndexOutOfBoundsException e)
-							{System.out.println("EERROR");}
+							temparray[arrayindex(x+z,y,lbgwidth)][j]=0;
 						}
 						x=-1;
 						y++;
@@ -96,13 +99,7 @@ public class Codebook
 						{
 							for(int zz=0;zz<lbgwidth;zz++)
 							{
-								try
-								{
-									temparray[arrayindex(x+zz,y+z,lbgwidth)][j]=0;
-									
-								}
-								catch(ArrayIndexOutOfBoundsException e)
-								{System.out.println("EERROR");}
+								temparray[arrayindex(x+zz,y+z,lbgwidth)][j]=0;
 							}
 						}
 						break;
@@ -194,7 +191,13 @@ public class Codebook
 	void jpegcompress()
 	{
 		rgbtoyuv(picarray,picarray.length);
+		process=new Processbar(rgbarray.showfr.getX(),rgbarray.showfr.getY());
 		fullDCT(YCbCrarray);
+		fullVQ();
+		RLC();
+		DPCM();
+		output();
+		fullRVQ();
 		fullIDCT(dctarray);
 		yuvtorgb(idctarray,picarray.length);
 	}
@@ -333,29 +336,238 @@ public class Codebook
 			index++;
 		}
 	}
+	void fullVQ()
+	{
+		int[][] Yvqtable={{16,11,10,16,24,40,51,61},
+						  {12,12,14,19,26,58,60,55},
+						  {14,13,16,24,40,57,69,56},
+						  {14,17,22,29,51,87,80,62},
+						  {18,22,37,56,68,109,103,77},
+						  {24,35,55,64,81,104,113,92},
+						  {49,64,78,87,103,121,120,101},
+						  {72,92,95,98,112,100,103,99}};
+		int[][] CbCrvqtable={{17,18,24,47,99,99,99,99},
+							 {18,21,26,66,99,99,99,99},
+							 {24,26,56,99,99,99,99,99},
+							 {47,66,99,99,99,99,99,99},
+							 {99,99,99,99,99,99,99,99},
+							 {99,99,99,99,99,99,99,99},
+							 {99,99,99,99,99,99,99,99},
+							 {99,99,99,99,99,99,99,99}};
+		for(int yy=0;yy<myheight;yy+=8)
+		{
+			for(int xx=0;xx<mywidth;xx+=8)
+			{
+				for(int i=0,x=0,y=0;i<64;i++,x++)
+				{
+					dctarray[arrayindex(xx+x,yy+y,mywidth)][0]=(float)(dctarray[arrayindex(xx+x,yy+y,mywidth)][0]/Yvqtable[y][x]);
+					dctarray[arrayindex(xx+x,yy+y,mywidth)][1]=(float)(dctarray[arrayindex(xx+x,yy+y,mywidth)][1]/CbCrvqtable[y][x]);
+					dctarray[arrayindex(xx+x,yy+y,mywidth)][2]=(float)(dctarray[arrayindex(xx+x,yy+y,mywidth)][2]/CbCrvqtable[y][x]);
+					if(x==7)
+					{
+						x=-1;
+						y++;
+					}
+				}
+			}
+		}
+	}
+	void fullRVQ()
+	{
+		int[][] Yvqtable={{16,11,10,16,24,40,51,61},
+						  {12,12,14,19,26,58,60,55},
+						  {14,13,16,24,40,57,69,56},
+						  {14,17,22,29,51,87,80,62},
+						  {18,22,37,56,68,109,103,77},
+						  {24,35,55,64,81,104,113,92},
+						  {49,64,78,87,103,121,120,101},
+						  {72,92,95,98,112,100,103,99}};
+		int[][] CbCrvqtable={{17,18,24,47,99,99,99,99},
+							 {18,21,26,66,99,99,99,99},
+							 {24,26,56,99,99,99,99,99},
+							 {47,66,99,99,99,99,99,99},
+							 {99,99,99,99,99,99,99,99},
+							 {99,99,99,99,99,99,99,99},
+							 {99,99,99,99,99,99,99,99},
+							 {99,99,99,99,99,99,99,99}};
+		for(int yy=0;yy<myheight;yy+=8)
+		{
+			for(int xx=0;xx<mywidth;xx+=8)
+			{
+				for(int i=0,x=0,y=0;i<64;i++,x++)
+				{
+					dctarray[arrayindex(xx+x,yy+y,mywidth)][0]=(float)(dctarray[arrayindex(xx+x,yy+y,mywidth)][0]*Yvqtable[y][x]);
+					dctarray[arrayindex(xx+x,yy+y,mywidth)][1]=(float)(dctarray[arrayindex(xx+x,yy+y,mywidth)][1]*CbCrvqtable[y][x]);
+					dctarray[arrayindex(xx+x,yy+y,mywidth)][2]=(float)(dctarray[arrayindex(xx+x,yy+y,mywidth)][2]*CbCrvqtable[y][x]);
+					if(x==7)
+					{
+						x=-1;
+						y++;
+					}
+				}
+			}
+		}
+	}
+	void RLC()
+	{
+		int[] positionx={0,1,0,0,1,2,3,2,1,0,0,1,2,3,4,5,4,3,2,1,0,0,1,2,3,4,5,6,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7,7,6,5,4,3,2,3,4,5,6,7,7,6,5,4,5,6,7,7,6,7};
+		int[] positiony={0,0,1,2,1,0,0,1,2,3,4,3,2,1,0,0,1,2,3,4,5,6,5,4,3,2,1,0,0,1,2,3,4,5,6,7,7,6,5,4,3,2,1,2,3,4,5,6,7,7,6,5,4,3,4,5,6,7,7,6,5,6,7,7};
+		for(int z=0;z<3;z++)
+		{
+			for(int y=0,index=0;y<myheight;y+=8)
+			{
+				for(int x=0;x<mywidth;x+=8,index++)
+				{
+					RLCarray[index][z]="";
+					for(int i=1,zerocount=0;i<64;i++)
+					{
+						if((int)(dctarray[arrayindex(x+positionx[i],y+positiony[i],mywidth)][z])==0)
+						{
+							zerocount++;
+							if(i==63)
+							{
+								RLCarray[index][z]+="(0,0)";
+							}
+						}
+						else
+						{
+							RLCarray[index][z]+=("("+zerocount+",");
+							RLCarray[index][z]+=(String.valueOf((int)(dctarray[arrayindex(x+positionx[i],y+positiony[i],mywidth)][0]))+")");
+							zerocount=0;
+						}
+					}
+				}
+			}
+		}
+	}
+	void DPCM()
+	{
+		int[][] temparray=new int[mywidth/8*myheight/8][3];
+		for(int z=0;z<3;z++)
+		{
+			for(int y=0,index=0;y<myheight;y+=8)
+			{
+				for(int x=0;x<mywidth;x+=8,index++)
+				{
+					temparray[index][z]=(int)(dctarray[arrayindex(x,y,mywidth)][z]);
+				}
+			}
+		}
+		int temp,diff;
+		for(int z=0;z<3;z++)
+		{
+			temp=temparray[0][z];
+			DPCMarray[z]=String.valueOf(temp)+",";
+			for(int i=1;i<mywidth/8*myheight/8-1;i++)
+			{
+				diff=temparray[i][z]-temp;
+				DPCMarray[z]+=(String.valueOf(diff));
+				if(i!=mywidth/8*myheight/8-2)
+				{
+					DPCMarray[z]+=",";
+				}
+				temp=temparray[i][z];
+			}
+		}
+	}
+	void output()
+	{
+		FileWriter compressfile;
+		BufferedWriter bw;
+		savedialog=new FileDialog(rgbarray.showfr,"Pick a Picture",FileDialog.LOAD);
+		savedialog.setVisible(true);
+		String targetfile=savedialog.getDirectory();
+		String targetfilename=savedialog.getFile();
+		try
+		{
+			if(targetfilename!=null)
+			{
+				compressfile=new FileWriter(targetfile+targetfilename);
+				bw=new BufferedWriter(compressfile);
+				compressfile.write(rgbarray.mywidth+"\r\n");
+				compressfile.write(rgbarray.myheight+"\r\n");
+				for(int z=0;z<3;z++)
+				{
+					compressfile.write(";");
+					compressfile.write("\r\n");
+					compressfile.write(DPCMarray[z]);
+					compressfile.write("\r\n");
+					for(int y=0;y<myheight/8;y++)
+					{
+						for(int x=0;x<mywidth/8;x++)
+						{
+							compressfile.write(RLCarray[arrayindex(x,y,mywidth/8)][z]);
+							compressfile.write("\r\n");
+						}
+					}
+					compressfile.write(";");
+					compressfile.write("\r\n");
+					compressfile.flush();
+				}
+				compressfile.close();
+			}
+		}
+		catch(IOException e)
+		{
+			System.out.println("ERROR");
+		}
+		/*try
+		{
+			FileReader fr=new FileReader(targetfile+targetfilename);
+			BufferedReader br=new BufferedReader(fr);
+			String temp="";
+			int test=0;
+			while((temp=br.readLine())!=null)
+			{
+				
+			}
+		}
+		catch(IOException e)
+		{
+			
+		}*/
+	}
 	void rgbtoyuv(int[] array,int length)
 	{
 		YCbCrarray=new double[mywidth*myheight][3];
 		dctarray=new double[mywidth*myheight][3];
 		idctarray=new double[mywidth*myheight][3];
-		int index=0;
-		for(int i=0;i<mywidth*myheight;i++)
+		RLCarray=new String[mywidth/8*myheight/8][3];
+		dctdiffwidth=mywidth-rgbarray.mywidth;
+		dctdiffheight=myheight-rgbarray.myheight;
+		for(int i=0,x=0,y=0;i<mywidth*myheight;i++,x++)
 		{
-			if(((i%rgbarray.mywidth)!=(rgbarray.mywidth-1))&&(index<length-1))
+			if((x!=mywidth-dctdiffwidth-1)&&(y!=myheight-dctdiffheight-1))
 			{
-				YCbCrarray[i][0]=0.299*temp4depart[index][0]+0.587*temp4depart[index][1]+0.114*temp4depart[index][2];
-				YCbCrarray[i][1]=0.564*(temp4depart[index][2]-YCbCrarray[i][0]);
-				YCbCrarray[i][2]=0.713*(temp4depart[index][0]-YCbCrarray[i][0]);
-				index++;
+				YCbCrarray[arrayindex(x,y,mywidth)][0]=0.257*temp4depart[arrayindex(x,y,rgbarray.mywidth)][0]+0.504*temp4depart[arrayindex(x,y,rgbarray.mywidth)][1]+0.098*temp4depart[arrayindex(x,y,rgbarray.mywidth)][2]+16;
+				YCbCrarray[arrayindex(x,y,mywidth)][1]=-0.148*temp4depart[arrayindex(x,y,rgbarray.mywidth)][0]-0.291*temp4depart[arrayindex(x,y,rgbarray.mywidth)][1]+0.439*temp4depart[arrayindex(x,y,rgbarray.mywidth)][2]+128;
+				YCbCrarray[arrayindex(x,y,mywidth)][2]=0.439*temp4depart[arrayindex(x,y,rgbarray.mywidth)][0]-0.368*temp4depart[arrayindex(x,y,rgbarray.mywidth)][1]-0.071*temp4depart[arrayindex(x,y,rgbarray.mywidth)][2]+128;
 			}
 			else
 			{
-				YCbCrarray[i][0]=0;
-				YCbCrarray[i][1]=0;
-				YCbCrarray[i][2]=0;
-				if((i%mywidth)==(mywidth-1))
+				if(x==mywidth-dctdiffwidth-1)
 				{
-					index++;
+					for(int z=0;z<dctdiffwidth;z++)
+					{
+						YCbCrarray[arrayindex(x+z,y,mywidth)][0]=0;
+						YCbCrarray[arrayindex(x+z,y,mywidth)][1]=0;
+						YCbCrarray[arrayindex(x+z,y,mywidth)][2]=0;
+					}
+					x=-1;
+					y++;
+				}
+				else
+				{
+					for(int z=0;z<dctdiffheight;z++)
+					{
+						for(int zz=0;zz<mywidth;zz++)
+						{
+							YCbCrarray[arrayindex(x+zz,y+z,mywidth)][0]=0;
+							YCbCrarray[arrayindex(x+zz,y+z,mywidth)][1]=0;
+							YCbCrarray[arrayindex(x+zz,y+z,mywidth)][2]=0;
+						}
+					}
+					break;
 				}
 			}
 		}
@@ -363,7 +575,29 @@ public class Codebook
 	void yuvtorgb(double[][] array,int length)
 	{
 		int index=0;
-		for(int i=0;i<mywidth*myheight;i++)
+		for(int i=0,x=0,y=0;i<lbgheight*lbgwidth;i++,x++)
+		{
+			if((x!=mywidth-dctdiffwidth-1)&&(y!=myheight-dctdiffheight-1))
+			{				
+				picarray[arrayindex(x,y,rgbarray.mywidth)]=new Color(Math.round((float)(1.164*(array[arrayindex(x,y,mywidth)][0]-16)+1.596*(array[arrayindex(x,y,mywidth)][2]-128))),
+											Math.round((float)(1.164*(array[arrayindex(x,y,mywidth)][0]-16)-0.391*(array[arrayindex(x,y,mywidth)][1]-128)-0.813*(array[arrayindex(x,y,mywidth)][2]-128))),
+											Math.round((float)(1.164*(array[arrayindex(x,y,mywidth)][0]-16)+2.018*(array[arrayindex(x,y,mywidth)][1]-128)))).getRGB();
+			}
+			else
+			{
+				if(x==mywidth-dctdiffwidth-1)
+				{
+					x=-1;
+					y++;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		System.out.println("FIUN");
+		/*for(int i=0;i<mywidth*myheight;i++)
 		{
 			if(((i%rgbarray.mywidth)!=(rgbarray.mywidth-1))&&(index<length-1))
 			{
@@ -380,7 +614,7 @@ public class Codebook
 					index++;
 				}
 			}
-		}
+		}*/
 	}
 	void fullDCT(double[][] temparray)
 	{

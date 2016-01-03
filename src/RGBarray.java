@@ -110,6 +110,9 @@ class RGBarray
 				case 30:
 					codebook.LBG();
 					break;
+				case 31:
+					codebook.jpegcompress();
+					break;
 				case 40:
 					codebook.showdct();
 					break;
