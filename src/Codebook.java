@@ -172,10 +172,11 @@ public class Codebook
 				codebookb[i][j]=newpicarrayb[index][j];
 			}
 		}
-		for(int i=0;i<100;i++)
+		process.totaltimes(20);
+		for(int i=0;i<20;i++)
 		{
 			assign();
-			//update();
+			update();
 			process.increase();
 		}
 		process.done();
@@ -197,6 +198,7 @@ public class Codebook
 		RLC();
 		DPCM();
 		output();
+		process=new Processbar(rgbarray.showfr.getX(),rgbarray.showfr.getY());
 		fullRVQ();
 		fullIDCT(dctarray);
 		yuvtorgb(idctarray,picarray.length);
@@ -579,7 +581,7 @@ public class Codebook
 		{
 			if((x!=mywidth-dctdiffwidth-1)&&(y!=myheight-dctdiffheight-1))
 			{				
-				picarray[arrayindex(x,y,rgbarray.mywidth)]=new Color(Math.round((float)(1.164*(array[arrayindex(x,y,mywidth)][0]-16)+1.596*(array[arrayindex(x,y,mywidth)][2]-128))),
+				rgbarray.colorarray[arrayindex(x,y,rgbarray.mywidth)]=new Color(Math.round((float)(1.164*(array[arrayindex(x,y,mywidth)][0]-16)+1.596*(array[arrayindex(x,y,mywidth)][2]-128))),
 											Math.round((float)(1.164*(array[arrayindex(x,y,mywidth)][0]-16)-0.391*(array[arrayindex(x,y,mywidth)][1]-128)-0.813*(array[arrayindex(x,y,mywidth)][2]-128))),
 											Math.round((float)(1.164*(array[arrayindex(x,y,mywidth)][0]-16)+2.018*(array[arrayindex(x,y,mywidth)][1]-128)))).getRGB();
 			}
@@ -596,7 +598,6 @@ public class Codebook
 				}
 			}
 		}
-		System.out.println("FIUN");
 		/*for(int i=0;i<mywidth*myheight;i++)
 		{
 			if(((i%rgbarray.mywidth)!=(rgbarray.mywidth-1))&&(index<length-1))
@@ -636,16 +637,21 @@ public class Codebook
 	}
 	void fullIDCT(double[][] temparray)
 	{
+		process.open();
+		process.totaltimes(myheight/8*mywidth/8*3);
 		for(int z=0;z<3;z++)
 		{
 			for(int y=0;y<myheight;y+=8)
 			{
 				for(int x=0;x<mywidth;x+=8)
 				{
+					process.increase();
 					IDCT(temparray,x,y,z);
 				}
 			}
 		}
+		process.done();
+		process.dispose();
 	}
 	void DCT(double[][] temparray,int x,int y,int color)
 	{
