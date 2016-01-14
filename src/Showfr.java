@@ -58,6 +58,10 @@ class Showfr extends Frame implements ActionListener
 			menuitem.setActionCommand("30");
 			menuitem.addActionListener(this);
 			submenu.add(menuitem);
+			menuitem=new MenuItem("Jpeg compress");
+			menuitem.setActionCommand("31");
+			menuitem.addActionListener(this);
+			submenu.add(menuitem);
 			rightmenu.add(submenu);
 			rightmenu.addSeparator();
 			menuitem=new MenuItem("Show DCT");
