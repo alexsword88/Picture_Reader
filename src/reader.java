@@ -124,6 +124,7 @@ public class reader implements ActionListener
 		public void windowClosing(WindowEvent e)
 		{
 			main.dispose();
+			System.exit(0);
 		}
 	}
 	//=====For OS X File Filter=========

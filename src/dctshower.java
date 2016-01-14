@@ -153,7 +153,6 @@ public class dctshower extends Frame implements ActionListener,ItemListener
 				cardx=0;
 				cardy+=8;
 			}
-			System.out.println(cardx+","+cardy);
 			repaint();
 		}
 		void left()
@@ -167,7 +166,6 @@ public class dctshower extends Frame implements ActionListener,ItemListener
 				cardx=dctwidth-8;
 				cardy-=8;
 			}
-			System.out.println(cardx+","+cardy);
 			repaint();
 		}
 	}
